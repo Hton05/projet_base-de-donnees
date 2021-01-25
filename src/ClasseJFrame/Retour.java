@@ -1,0 +1,159 @@
+package ClasseJFrame;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.EventQueue;
+import java.awt.Font;
+import java.sql.ResultSet;
+
+import javax.swing.ImageIcon;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableModel;
+
+import ClasseJava.BaseDeDonnees;
+import javax.swing.JButton;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+
+public class Retour extends JFrame {
+
+	private JPanel contentPane;
+	private DefaultTableModel model = new DefaultTableModel();
+	private ResultSet rs;
+	private BaseDeDonnees db;
+	private JTable table;
+	
+	public Retour(String idCommande) {
+		Color couleur_back =Color.decode("#F2F3F4");
+		Color couleur1 = Color.decode("#17202A");
+		Color couleur2 = Color.decode("#1C98CF");
+		Color entete = Color.decode("#083346");
+		Color vert =Color.decode("#27AE60");
+		Color rouge =Color.decode("#D32222");
+		Color orange =Color.decode("#E67E22");
+		Color mauve =Color.decode("#6C3483");
+		
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		setBounds(183, 0, 1000, 768);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		contentPane.setLayout(null);
+		setContentPane(contentPane);
+		
+		JPanel panel = new JPanel();
+		panel.setBackground(entete);
+		panel.setBounds(0, 0, 1000, 88);
+		contentPane.add(panel);
+		panel.setLayout(null);
+		
+		JLabel lblNewLabel = new JLabel("");
+		lblNewLabel.setBounds(0, 0, 150, 88);
+		lblNewLabel.setIcon(new ImageIcon(this.getClass().getResource("/logo2.png")));
+		panel.add(lblNewLabel);
+		
+		JLabel lblGestionArticle = new JLabel("BON DE LIVRAISON");
+		lblGestionArticle.setHorizontalAlignment(SwingConstants.CENTER);
+		lblGestionArticle.setForeground(Color.WHITE);
+		lblGestionArticle.setFont(new Font("Noto Sans CJK JP", Font.BOLD, 40));
+		lblGestionArticle.setBounds(272, 31, 486, 48);
+		panel.add(lblGestionArticle);
+		
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setFont(new Font("Dialog", Font.BOLD, 12));
+		scrollPane.setBackground(Color.WHITE);
+		scrollPane.setForeground(Color.DARK_GRAY);
+		scrollPane.setBounds(100, 192, 800, 343);
+		contentPane.add(scrollPane);
+		
+		table = new JTable();
+		table.setSelectionForeground(Color.WHITE);
+		table.setSelectionBackground(couleur2);
+		table.setRowHeight(30);
+		table.setShowGrid(false);
+		scrollPane.setViewportView(table);
+		
+		
+		db = new BaseDeDonnees();
+		model.addColumn("Id commande");
+		model.addColumn("Nom client");
+		model.addColumn("Prénom client");
+		model.addColumn("Adresse client");
+		model.addColumn("Date de livraison");
+		model.addColumn("Libellé article");
+		model.addColumn("Prix unitaire");
+		model.addColumn("Quantite");
+		model.addColumn("Montant");
+		model.setRowCount(0);
+		rs = db.selectAll("v_bon_livraison", "idCommande = '" +idCommande+"'");
+		try {
+			while (rs.next()) {
+				model.addRow(new Object [] { rs.getInt("idCommande"),
+						rs.getString("nom_client"),
+						rs.getString("prenom_client"),
+						rs.getString("adresse_client"),
+						rs.getString("date_livraison"),
+						rs.getString("libelle_article"),
+						rs.getDouble("prix_unitaire"),
+						rs.getString("qte_article"),						
+						rs.getDouble("montant")						
+				});
+			}
+		} catch(Exception e) {
+			System.err.println(e.getMessage());
+		}
+		table.setModel(model);
+		
+		JButton btnRetour = new JButton("Retourner");
+		btnRetour.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				Retourner frame = new Retourner(idCommande, String.valueOf(table.getValueAt(table.getSelectedRow(), 5)), Integer.parseInt(String.valueOf(table.getValueAt(table.getSelectedRow(), 7))));
+				frame.setVisible(true);
+			}
+		});
+		btnRetour.setSelected(true);
+		btnRetour.setForeground(new Color(28, 152, 207));
+		btnRetour.setFont(new Font("Dialog", Font.BOLD, 20));
+		btnRetour.setBorderPainted(false);
+		btnRetour.setBackground(Color.WHITE);
+		btnRetour.setBounds(100, 546, 154, 42);
+		contentPane.add(btnRetour);
+		
+		JButton btnActualiser = new JButton("Actualiser");
+		btnActualiser.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				model.setRowCount(0);
+				rs = db.selectAll("v_bon_livraison", "idCommande = '" +idCommande+"'");
+				try {
+					while (rs.next()) {
+						model.addRow(new Object [] { rs.getInt("idCommande"),
+								rs.getString("nom_client"),
+								rs.getString("prenom_client"),
+								rs.getString("adresse_client"),
+								rs.getString("date_livraison"),
+								rs.getString("libelle_article"),
+								rs.getDouble("prix_unitaire"),
+								rs.getString("qte_article"),						
+								rs.getDouble("montant")						
+						});
+					}
+				} catch(Exception e1) {
+					System.err.println(e1.getMessage());
+				}
+				table.setModel(model);
+			}
+		});
+		btnActualiser.setForeground(new Color(39, 174, 96));
+		btnActualiser.setFont(new Font("Dialog", Font.BOLD, 20));
+		btnActualiser.setBorderPainted(false);
+		btnActualiser.setBackground(new Color(242, 243, 244));
+		btnActualiser.setBounds(264, 546, 194, 42);
+		contentPane.add(btnActualiser);
+	}
+}
